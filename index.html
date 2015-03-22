@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Les sites ZPS du r&eacute;seau Natura 2000</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="http-equiv" content="Content-type: text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.css" />
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <!--[if lte IE 8]><link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.ie.css" /><![endif]-->
+    <link rel="stylesheet" href="css/MarkerCluster.css" />
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
+    <!--[if lte IE 8]><link rel="stylesheet" href="../dist/MarkerCluster.Default.ie.css" /><![endif]-->
+    <link rel="stylesheet" href="css/leaflet.label.css" />
+    <link rel="stylesheet" href="css/screen.css" />
+<style>
+
+  #histo {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: relative;
+        width: 650px;
+        font: 12px Arial;
+float:right;
+    }
+
+    .axis text {
+        font: 12px Arial;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .bar {
+        fill: #30C9C9;
+        fill-opacity: .9;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    label {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+#map{
+width:100%;
+height:500px;
+}
+
+h4{
+color:#B40534;
+margin-left:10px;
+}
+
+h1{
+color:#30C9C9;
+margin-left:10px;
+}
+
+#bas
+{
+display:inline-block;
+
+
+}
+
+#infosOiseaux{
+width:700px;
+display:inline-block;
+margin-left:10px;
+position:relative;
+}
+
+strong
+{
+color:#B40534;
+}
+</style>
+</head>
+<body>
+<h1>Zones de Protection Sp&eacute;ciales dans le r&eacute;seau Natura 2000</h1>
+<h4 id="srI">(source Inventaire National du Patrimoine Naturel)</h4>
+    <div id="map"></div>
+</br>
+</br>
+    <div id="filter-container">
+        <form class="form-search" class="noSelect" onSubmit="addCsvMarkers(); return false;">
+            <a href="#" id="clear" class="leaflet-popup-close-button">&#215;</a>
+            <div class="input-append">
+                <input type="text" id="filter-string" class="input-medium search-query search-box" autocomplete="off">
+                <button type="submit" class="btn search-box"><i class="icon-search"></i></button>
+                <!-- <span class="add-on">
+                </span> -->
+            </div>
+        </form>
+        <div id="search-results" class="leaflet-control-attribution leaflet-control pull-right"></div>
+    </div>
+<div id="bas">
+
+<div id="histo">
+</br>
+ 
+<h4 id="srI">Histogramme de l'aire totale des sites ZPS par r&eacute;gion</h4>
+<input id="inp" type="checkbox"> Trier
+</div>
+<!--<label>-->
+
+<!--</label>-->
+<div id="infosOiseaux">
+</div>
+<h4>La liste des oiseaux par site ZPS</h1>
+<p>
+<strong>Site ZPS</strong>
+<select id="sitesZPS" onchange="updateX(this.value)">
+</select> 
+<strong>Esp&egrave;ce oiseau</strong>
+<select id="especesOiseaux" onchange="updateY(this.value)">
+</select> 
+</br>
+</br>
+<strong>Esp&egrave;ce :</strong>
+<span id="espece"></span>
+</br>
+<strong>Nom usuel :</strong>
+<span id="nomUsuel"></span>
+</br>
+<strong>Ordre :</strong>
+<span id="ordre"></span>
+</br>
+</br>
+<!-- <span id="urlImage"></span> -->
+<img id="imEs" alt="" src=""/>
+</p>
+</div>
+</div>
+
+   <script src="d3.min.js"  charset="utf-8"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.4.5/leaflet.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="js/leaflet.markercluster.js"></script>
+    <script src="js/leaflet.geocsv.js"></script>
+    <script src="js/leaflet.label.js"></script>
+    <script src="config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+<script>
+
+    var margin = { top: 20, right: 20, bottom: 178, left: 80 },
+        width = 650 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+   var formatPercent = d3.format(".0");
+
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width], .1, 1);
+
+    var y = d3.scale.linear()
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .tickFormat(formatPercent); 
+
+    var svg = d3.select("#histo").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv("infosSitesTres.csv", function (error, data) {
+
+        data.forEach(function (d) {
+            d.aireZPS = +d.aireZPS;
+        });
+
+        x.domain(data.map(function (d) { return d.region; }));
+        y.domain([0, d3.max(data, function (d) { return d.aireZPS; })]);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+ svg.selectAll(".x text") 
+        .attr("transform", function(d) {return "translate(" + this.getBBox().height * -1  + "," + this.getBBox().height * 7  + ")rotate(-90)";});
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("aire ZPS (ha)");
+
+        svg.selectAll(".bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function (d) { return x(d.region); })
+            .attr("width", x.rangeBand())
+            .attr("y", function (d) { return y(d.aireZPS); })
+            .attr("height", function (d) { return height - y(d.aireZPS); });
+                                      
+
+        d3.select("#inp").on("change", change);
+
+        var sortTimeout = setTimeout(function () {
+            d3.select("#inp").property("checked", true).each(change);
+        }, 2000);
+
+        function change() {
+            clearTimeout(sortTimeout);
+
+            // Copy-on-write since tweens are evaluated after a delay.
+            var x0 = x.domain(data.sort(this.checked
+                ? function (a, b) { return b.aireZPS - a.aireZPS; }
+                : function (a, b) { return d3.ascending(a.region, b.region); })
+                .map(function (d) { return d.region; }))
+                .copy();
+
+            svg.selectAll(".bar")
+                .sort(function (a, b) { return x0(a.region) - x0(b.region); });
+
+            var transition = svg.transition().duration(750),
+                delay = function (d, i) { return i * 50; };
+
+            transition.selectAll(".bar")
+                .delay(delay)
+                .attr("x", function (d) { return x0(d.region); });
+
+            transition.select(".x.axis")
+                .call(xAxis)
+              .selectAll("g")
+                .delay(delay);
+        }
+    });
+
+</script>
+<script>
+var tabEspeces = [];
+var especeSelectionne;
+var selSite="-- S&eacute;lectionnez un site ZPS --";
+var selEspece="-- S&eacute;lectionnez une esp&egrave;ce d'oiseau --";
+
+updateX = function(feature){
+if($("#sitesZPS option:selected").text()==selSite)return;
+
+$("#especesOiseaux").empty().append("whatever");
+
+ $.ajax({
+        type: "GET",
+        url: "infosSitesAA2.txt",
+        dataType: "text",
+        success: function(data) {processData2(data);}
+     });
+	}
+
+
+updateY = function(feature){
+if($("#especesOiseaux option:selected").text()==selEspece)return;
+	//alert(tabEspeces)
+//especeSelectionne=$("#especesOiseaux option:selected").text();
+   // $("#espece").text(siteSelectionne);
+
+$.ajax({
+        type: "GET",
+        url: "infosEspecNew3.txt",
+        dataType: "text",
+        success: function(data) {processData3(data);}
+     });
+
+}
+
+
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "infosSitesBC2.txt",
+        dataType: "text",
+        success: function(data) {processData(data);}
+     });
+});
+
+function processData(allText) {
+    var allTextLines = allText.split(/\r\n|\n/);
+    var headers = allTextLines[0].split(',');
+    var lines = [];
+$("#sitesZPS").append("<option value='"+selSite+"'>"+selSite+"</option>");
+    for (var i=1; i<allTextLines.length; i++) {
+        var data = allTextLines[i].split(',');
+        if (data.length == headers.length) {
+
+            for (var j=1; j<2; j++) {
+                //tarr.push(headers[j]+":"+data[j]);+"\n")
+  
+$("#sitesZPS").append("<option value='"+data[j]+"'>"+data[j]+"</option>");
+		}
+            }   
+        }
+}
+
+
+function processData3(allText) {
+
+    var especeSelectionnee=$("#especesOiseaux option:selected").text();
+    
+    var allTextLines = allText.split(/\r\n|\n/);
+    var headers = allTextLines[0].split(',');
+    var lines = [];
+
+    for (var i=1; i<allTextLines.length; i++) {
+        var data = allTextLines[i].split(',');
+        if (data.length == headers.length) {
+
+           
+           // for (var j=1; j<2; j++) {
+                //tarr.push(headers[j]+":"+data[j]);+"\n")
+  if(data[1]==especeSelectionnee)
+{
+
+//<span id="espece"></span>
+//<span id="nomUsuel"></span>
+//<span id="ordre"></span>
+//<span id="urlImage"></span>
+
+$("#espece").text(data[1]);
+$("#nomUsuel").text(data[0]);
+$("#ordre").text(data[2]);
+$("#urlImage").text(data[4]);
+$("#imEs").attr('src', data[4]);
+$("#imEs").attr('alt', data[0]);
+break;
+}
+        }
+    }
+    //alert(lines);
+}
+
+
+function processData2(allText) {
+
+    var siteSelectionne=$("#sitesZPS option:selected").text();
+    
+    var allTextLines = allText.split(/\r\n|\n/);
+    var headers = allTextLines[0].split(',');
+    var lines = [];
+
+$("#especesOiseaux").append("<option value='"+selEspece+"'>"+selEspece+"</option>");
+
+    for (var i=1; i<allTextLines.length; i++) {
+        var data = allTextLines[i].split(',');
+        if (data.length == headers.length) {
+
+            var espec = [];
+           // for (var j=1; j<2; j++) {
+                //tarr.push(headers[j]+":"+data[j]);+"\n")
+  if(data[0]==siteSelectionne)
+{
+
+espec.push(data[1]);
+$("#especesOiseaux").append("<option value='"+data[1]+"'>"+data[1]+"</option>");
+}
+//$("#sitesZPS").append("<option value='"+data[j]+"'>"+data[j]+"</option>");
+//$(sitesZPS)
+           // }
+            tabEspeces.push(espec);
+        }
+    }
+    //alert(lines);
+}
+</script>
+</html>
