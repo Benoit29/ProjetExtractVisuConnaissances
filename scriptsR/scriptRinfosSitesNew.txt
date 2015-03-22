@@ -1,0 +1,73 @@
+setwd("J:/PartageAvecFedora/ProR/data")
+
+infosSitesBis <- read.csv('infosSitesBis.csv', header=T, sep=";", quot="\"", stringsAsFactors=F)
+
+dta.sum <- aggregate(infosSitesBis$nomEspece,by = list(infosSitesBis$sitecode),FUN = "length")
+
+names(dta.sum) = c('region', 'coderegion','aireZPS')
+
+write.table(dta.sum,"infosSitesTres.csv", sep=";", row.names=FALSE)
+
+
+
+infosSites <- read.csv('infosSitesNew.csv', header=T, sep=";", quot="\"", stringsAsFactors=F)
+
+a=as.numeric(gsub(",",".",infosSites2$area))
+
+dta.sum <- aggregate(a,by = list(infosSites2$region,infosSites2$coderegion),FUN = "sum")
+length(dta.sum$sitecode)
+setwd("J:/PartageAvecFedora/Pourlarentrée2014/Representation connaissances/Projet/2 - Sources/Régions_DonneeProjet")
+
+library(XML, pos=14)
+
+#Chargement des données
+data=xmlParse("XMLFRANCE1409.xml")
+
+#Colonnes du fichier en sortie
+sitecode=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SITECODE",xmlValue)
+sitename=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SITE_NAME",xmlValue)
+region=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/REG",xmlValue)
+longitude=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/LONGITUDE",xmlValue)
+latitude=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/LATITUDE",xmlValue)
+area=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/AREA",xmlValue)
+length(area)
+countSepecies=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SPECIES",function(x) xpathSApply(x,"count(./SPECIES_ROW)"))
+countSepecies2=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SPECIES_OTHER",function(x) xpathSApply(x,"count(./SPECIES_OTHER_ROW)"))
+nbreEspces=countSepecies+countSepecies2
+
+#Constitution du dataFrame
+dataToStudy1=data.frame(sitecode,sitename,region,longitude,latitude,area,nbEspeces=dta.sum$x)
+
+#Substition caractères spéciaux
+dataToStudy1$sitename=gsub("Ã©","é",dataToStudy1$sitename) 
+dataToStudy1$sitename=gsub("Ãª","ê",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã‰","E",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã¨","è",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã®","î",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã´","ô",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã¢","â",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã«","ë",dataToStudy1$sitename)
+dataToStudy1$sitename=gsub("Ã","à",dataToStudy1$sitename) 
+
+
+dataToStudy1$region=gsub("Ã©","é",dataToStudy1$region) 
+dataToStudy1$region=gsub("Ãª","ê",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã‰","E",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã¨","è",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã®","î",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã´","ô",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã¢","â",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã«","ë",dataToStudy1$region)
+dataToStudy1$region=gsub("Ã","à",dataToStudy1$region)
+
+#Ecriture du dataFrame dans le fichier en sortie
+
+class(infosSites$lat)
+
+dataToStudy1$latitude=as.numeric(gsub(",",".",dataToStudy1$latitude))
+dataToStudy1$longitude=as.numeric(gsub(",",".",dataToStudy1$longitude))
+coderegion=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/CD_REG",xmlValue)
+dataToStudy2=data.frame(dataToStudy1,coderegion)
+colnames(dataToStudy2)<- c("CodeSite","NomSite","Region","lng","lat","Aire","NbEspeces","CodeRegion")
+infos=data.frame(NomSite=dataToStudy2$NomSite,CodeSite=dataToStudy2$CodeSite,Region=dataToStudy2$Region,CodeRegion=dataToStudy2$CodeRegion,Aire=dataToStudy2$Aire,NbEspeces=dataToStudy2$NbEspeces,lat=dataToStudy2$lat,lng=dataToStudy2$lng)
+write.table(infos,"infosSitesGood.csv", sep="|", row.names=FALSE)

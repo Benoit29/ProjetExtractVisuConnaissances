@@ -1,0 +1,11 @@
+
+
+infosSites <- read.csv('infosSitesNew.csv', header=T, sep=";", quot="\"", stringsAsFactors=F)
+
+a=as.numeric(gsub(",",".",infosSites2$area))
+
+dta.sum <- aggregate(a,by = list(infosSites2$region,infosSites2$coderegion),FUN = "sum")
+
+names(dta.sum) = c('region', 'coderegion','aireZPS')
+
+write.table(dta.sum,"infosSitesTres.csv", sep=";", row.names=FALSE)

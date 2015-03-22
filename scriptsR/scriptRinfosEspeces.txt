@@ -1,0 +1,65 @@
+setwd("J:/PartageAvecFedora/Pourlarentrée2014/Representation connaissances/Projet/2 - Sources/Régions_DonneeProjet")
+
+library(XML, pos=14)
+
+data=xmlParse("XMLFRANCE1409.xml")
+nomEspece=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SPECIES/SPECIES_ROW/NOM",xmlValue)
+nomEspeceNew=nomEspece[!duplicated(nomEspece)]
+
+
+#Modification des noms pour les raisons suivantes : soit faute d'orthographe, doublon de mots dans le champ renseigné en base de données soit la spécification de 
+l'espèce d'oiseau n'est pas reconnue par wikipédia (souvent à cause d'une précision dans le nom par rapport à la localisation géographique)
+dans la base de données 
+
+nomEspeceNew[142]="Tetrao tetrix"
+nomEspeceNew[147]="Phalacrocorax carbo"
+nomEspeceNew[182]="Puffinus mauretanicus"
+nomEspeceNew[190]="Xema sabini"
+nomEspeceNew[223]="Lagopus mutus"
+nomEspeceNew[224]="Perdix perdix"
+nomEspeceNew[239]="Lagopus mutus"
+nomEspeceNew[240]="Alectoris graeca"
+nomEspeceNew[254]="Puffinus yelkouan"
+nomEspeceNew[261]="Accipiter gentilis"
+
+
+#web scrapping sur wikipédia
+
+base.url = 'http://fr.wikipedia.org/wiki/'
+titre=c()
+classe=c()
+ordre=c()
+urlImage=c()
+
+for (i in 1:length(nomEspeceNew))
+{
+doc.html <- htmlParse(paste(base.url, nomEspeceNew[i]))
+titre[i] <- xpathApply(doc.html,  "//body//h1", xmlValue)
+classe[i]=xpathApply(doc.html,  "//body//table[@class='taxobox_classification']//tr//th//a[@title='Classe (biologie)']//ancestor::tr//td//span//a",xmlValue)
+ordre[i]=xpathApply(doc.html,  "//body//table[@class='taxobox_classification']//tr//th//a[@title='Ordre (biologie)']//ancestor::tr//td//span//a",xmlValue)
+urls <- xpathSApply(doc.html, "//body//div[@class='images']//a//img[1]", xmlGetAttr, 'src')
+urlImage[i]=urls[[1]]
+}
+
+
+dataToApply3=data.frame(nom=unlist(titre), nombinomial=nomEspeceNew, ordre=unlist(ordre),classe=unlist(classe),urlImage=unlist(urlImage))
+
+write.table(dataToApply3,"infosEspeces.csv", sep=";", row.names=FALSE)
+
+
+#Modification en vue de la visualisation avec Leaflet
+infosSites <- read.csv('infosSitesNew.csv', header=T, sep=";", quot="\"", stringsAsFactors=F)
+infosSites$latitude=gsub(",",".",infosSites$latitude)
+infosSites$longitude=gsub(",",".",infosSites$longitude)
+colnames(infosSites)<- c("CodeSite","NomSite","Region","lng","lat","Aire","NbEspeces","CodeRegion")
+
+colnames(out.file) <- c("c","d")
+
+write.table(infosSites,"infosSitesG.csv", sep="|", row.names=FALSE)
+class(infosSites$lat)
+infosSites$lat=as.numeric(infosSites$lat)
+infosSites$lng=as.numeric(infosSites$lng)
+infos=data.frame(NomSite=infosSites$NomSite,CodeSite=infosSites$CodeSite,Region=infosSites$Region,CodeRegion=infosSites$CodeRegion,Aire=infosSites$Aire,NbEspeces=infosSites$NbEspeces,lat=infosSites$lat,lng=infosSites$lng)
+write.table(infos,"infosSitesGood.csv", sep="|", row.names=FALSE)
+
+

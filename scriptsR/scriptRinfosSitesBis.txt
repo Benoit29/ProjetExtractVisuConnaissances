@@ -1,0 +1,12 @@
+setwd("J:/PartageAvecFedora/Pourlarentrée2014/Representation connaissances/Projet/2 - Sources/Régions_DonneeProjet")
+
+library(XML, pos=14)
+
+data=xmlParse("XMLFRANCE1409.xml")
+
+nomEspece=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SPECIES/SPECIES_ROW/NOM",xmlValue)
+sitecode=xpathSApply(data,"//BIOTOP[ZPS_SIC='Z']/SPECIES/SPECIES_ROW/SITECODE",xmlValue)
+dataToStudy2=data.frame(sitecode,nomEspece)
+dataToStudy2new=dataToStudy2[!duplicated(dataToStudy2[1:2]),]
+write.table(dataToStudy2new,"infosSitesBis.csv", sep=";", row.names=FALSE)
+
