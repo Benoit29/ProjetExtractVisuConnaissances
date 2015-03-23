@@ -18,7 +18,8 @@
   #histo {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         position: relative;
-        width: 650px;
+       /*width: 650px;*/ 
+       width: 45%;
         font: 12px Arial;
 float:right;
     }
@@ -67,15 +68,22 @@ margin-left:10px;
 #bas
 {
 display:inline-block;
+margin-left:10px;
+}
 
-
+#esp{
+    margin-left:10px;
 }
 
 #infosOiseaux{
-width:700px;
+width:490px;
 display:inline-block;
-margin-left:10px;
-position:relative;
+min-width:50%;
+float:left;
+}
+
+#inp{
+    margin-left:20px;
 }
 
 strong
@@ -86,11 +94,12 @@ color:#B40534;
 </head>
 <body>
 <h1>Zones de Protection Sp&eacute;ciales dans le r&eacute;seau Natura 2000</h1>
-<h4 id="srI">(source Inventaire National du Patrimoine Naturel)</h4>
+<h4 id="srI">source Inventaire National du Patrimoine Naturel (septembre 2014)</h4>
     <div id="map"></div>
 </br>
 </br>
     <div id="filter-container">
+        </br></br></br></br></br>
         <form class="form-search" class="noSelect" onSubmit="addCsvMarkers(); return false;">
             <a href="#" id="clear" class="leaflet-popup-close-button">&#215;</a>
             <div class="input-append">
@@ -105,9 +114,8 @@ color:#B40534;
 <div id="bas">
 
 <div id="histo">
-</br>
  
-<h4 id="srI">Histogramme de l'aire totale des sites ZPS par r&eacute;gion</h4>
+<h4 id="srI">Aire totale des sites ZPS par r&eacute;gion</h4>
 <input id="inp" type="checkbox"> Trier
 </div>
 <!--<label>-->
@@ -120,7 +128,7 @@ color:#B40534;
 <strong>Site ZPS</strong>
 <select id="sitesZPS" onchange="updateX(this.value)">
 </select> 
-<strong>Esp&egrave;ce oiseau</strong>
+<strong id="esp">Esp&egrave;ce oiseau</strong>
 <select id="especesOiseaux" onchange="updateY(this.value)">
 </select> 
 </br>
