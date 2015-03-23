@@ -1,0 +1,1 @@
+Renommer le fichier config.txt en config.js
