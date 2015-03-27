@@ -281,9 +281,6 @@ $("#especesOiseaux").empty().append("whatever");
 
 updateY = function(feature){
 if($("#especesOiseaux option:selected").text()==selEspece)return;
-	//alert(tabEspeces)
-//especeSelectionne=$("#especesOiseaux option:selected").text();
-   // $("#espece").text(siteSelectionne);
 
 $.ajax({
         type: "GET",
@@ -314,7 +311,6 @@ $("#sitesZPS").append("<option value='"+selSite+"'>"+selSite+"</option>");
         if (data.length == headers.length) {
 
             for (var j=1; j<2; j++) {
-                //tarr.push(headers[j]+":"+data[j]);+"\n")
   
 $("#sitesZPS").append("<option value='"+data[j]+"'>"+data[j]+"</option>");
 		}
@@ -335,16 +331,9 @@ function processData3(allText) {
         var data = allTextLines[i].split(',');
         if (data.length == headers.length) {
 
-           
-           // for (var j=1; j<2; j++) {
-                //tarr.push(headers[j]+":"+data[j]);+"\n")
   if(data[1]==especeSelectionnee)
 {
 
-//<span id="espece"></span>
-//<span id="nomUsuel"></span>
-//<span id="ordre"></span>
-//<span id="urlImage"></span>
 
 $("#espece").text(data[1]);
 $("#nomUsuel").text(data[0]);
@@ -356,7 +345,7 @@ break;
 }
         }
     }
-    //alert(lines);
+ 
 }
 
 
@@ -375,21 +364,18 @@ $("#especesOiseaux").append("<option value='"+selEspece+"'>"+selEspece+"</option
         if (data.length == headers.length) {
 
             var espec = [];
-           // for (var j=1; j<2; j++) {
-                //tarr.push(headers[j]+":"+data[j]);+"\n")
+     
   if(data[0]==siteSelectionne)
 {
 
 espec.push(data[1]);
 $("#especesOiseaux").append("<option value='"+data[1]+"'>"+data[1]+"</option>");
 }
-//$("#sitesZPS").append("<option value='"+data[j]+"'>"+data[j]+"</option>");
-//$(sitesZPS)
-           // }
+
             tabEspeces.push(espec);
         }
     }
-    //alert(lines);
+  
 }
 </script>
 </html>
