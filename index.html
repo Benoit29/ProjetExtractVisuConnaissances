@@ -298,7 +298,7 @@ $.ajax({
 $(document).ready(function() {
     $.ajax({
         type: "GET",
-        url: "infosSitesBC2.txt",
+        url: "infosSitesBB11.csv",
         dataType: "text",
         success: function(data) {processData(data);}
      });
@@ -306,11 +306,11 @@ $(document).ready(function() {
 
 function processData(allText) {
     var allTextLines = allText.split(/\r\n|\n/);
-    var headers = allTextLines[0].split(',');
+    var headers = allTextLines[0].split('|');
     var lines = [];
 $("#sitesZPS").append("<option value='"+selSite+"'>"+selSite+"</option>");
     for (var i=1; i<allTextLines.length; i++) {
-        var data = allTextLines[i].split(',');
+        var data = allTextLines[i].split('|');
         if (data.length == headers.length) {
 
             for (var j=1; j<2; j++) {
