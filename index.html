@@ -303,6 +303,7 @@ $(document).ready(function() {
 
 function processData(allText) {
     var allTextLines = allText.split(/\r\n|\n/);
+    //changement du split
     var headers = allTextLines[0].split('|');
     var lines = [];
 $("#sitesZPS").append("<option value='"+selSite+"'>"+selSite+"</option>");
