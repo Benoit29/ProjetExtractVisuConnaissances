@@ -60,6 +60,11 @@ color:#B40534;
 margin-left:10px;
 }
 
+h5{
+color:#B40534;
+margin-left:10px;
+}
+
 h1{
 color:#30C9C9;
 margin-left:10px;
@@ -115,7 +120,7 @@ color:#B40534;
 
 <div id="histo">
  
-<h4 id="srI">Aire totale des sites ZPS par r&eacute;gion</h4>
+<h4 id="srI">Superficie des sites ZPS par r&eacute;gion</h4>
 <input id="inp" type="checkbox"> Trier
 </div>
 <!--<label>-->
@@ -123,8 +128,10 @@ color:#B40534;
 <!--</label>-->
 <div id="infosOiseaux">
 </div>
-<h4>Oiseaux sur un site ZPS donn&eacute;</h1>
+<h4>Espèces d'oiseaux sur un site ZPS</h4>
+ <h5>(mentionnées dans la directive Oiseaux Natura 2000)</h5>
 <p>
+</br>
 <strong>Site ZPS</strong>
 <select id="sitesZPS" onchange="updateX(this.value)">
 </select> 
@@ -212,7 +219,7 @@ color:#B40534;
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
-            .text("aire ZPS (ha)");
+            .text("Superficie (ha)");
 
         svg.selectAll(".bar")
             .data(data)
